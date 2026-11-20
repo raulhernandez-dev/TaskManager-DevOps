@@ -1,5 +1,6 @@
 // Logica del cliente de TaskManager
 const API = "/api/tareas";
+const ESTADOS = ["Pendiente", "En proceso", "Terminada"];
 
 const formTarea = document.getElementById("form-tarea");
 const lista = document.getElementById("lista-tareas");
@@ -40,13 +41,16 @@ function escaparHTML(texto) {
 
 function crearElementoTarea(tarea) {
   const li = document.createElement("li");
-  li.className = "tarea";
+  li.className = `tarea estado-${tarea.estado.toLowerCase().replace(" ", "-")}`;
   li.dataset.id = tarea.id;
   li.innerHTML = `
     <h3>${escaparHTML(tarea.nombre)}</h3>
     ${tarea.descripcion ? `<p>${escaparHTML(tarea.descripcion)}</p>` : ""}
-    <small>Prioridad: ${escaparHTML(tarea.prioridad)} · Estado: ${escaparHTML(tarea.estado)}</small>
+    <small>Prioridad: ${escaparHTML(tarea.prioridad)}</small>
     <div class="tarea-acciones">
+      <select class="selector-estado" data-accion="estado" aria-label="Estado de la tarea">
+        ${ESTADOS.map((e) => `<option value="${e}" ${e === tarea.estado ? "selected" : ""}>${e}</option>`).join("")}
+      </select>
       <button type="button" class="btn btn-secundario" data-accion="editar">Editar</button>
       <button type="button" class="btn btn-peligro" data-accion="eliminar">Eliminar</button>
     </div>
@@ -147,6 +151,23 @@ async function eliminarTarea(id) {
   }
 }
 
+// RF05 - Cambiar estado
+lista.addEventListener("change", async (evento) => {
+  const selector = evento.target.closest("select[data-accion='estado']");
+  if (!selector) return;
+  const id = Number(selector.closest(".tarea").dataset.id);
+  try {
+    await peticion(`${API}/${id}/estado`, {
+      method: "PATCH",
+      body: JSON.stringify({ estado: selector.value }),
+    });
+    mostrarMensaje(`Estado cambiado a "${selector.value}".`);
+    await cargarTareas();
+  } catch (error) {
+    mostrarMensaje(error.message, true);
+  }
+});
+
 lista.addEventListener("click", (evento) => {
   const boton = evento.target.closest("button[data-accion]");
   if (!boton) return;
@@ -212,6 +233,23 @@ async function eliminarTarea(id) {
     mostrarMensaje(error.message, true);
   }
 }
+
+// RF05 - Cambiar estado
+lista.addEventListener("change", async (evento) => {
+  const selector = evento.target.closest("select[data-accion='estado']");
+  if (!selector) return;
+  const id = Number(selector.closest(".tarea").dataset.id);
+  try {
+    await peticion(`${API}/${id}/estado`, {
+      method: "PATCH",
+      body: JSON.stringify({ estado: selector.value }),
+    });
+    mostrarMensaje(`Estado cambiado a "${selector.value}".`);
+    await cargarTareas();
+  } catch (error) {
+    mostrarMensaje(error.message, true);
+  }
+});
 
 lista.addEventListener("click", (evento) => {
   const boton = evento.target.closest("button[data-accion]");

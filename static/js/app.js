@@ -48,6 +48,7 @@ function crearElementoTarea(tarea) {
     <small>Prioridad: ${escaparHTML(tarea.prioridad)} · Estado: ${escaparHTML(tarea.estado)}</small>
     <div class="tarea-acciones">
       <button type="button" class="btn btn-secundario" data-accion="editar">Editar</button>
+      <button type="button" class="btn btn-peligro" data-accion="eliminar">Eliminar</button>
     </div>
   `;
   return li;
@@ -133,11 +134,25 @@ formEditar.addEventListener("submit", async (evento) => {
 
 document.getElementById("cancelar-edicion").addEventListener("click", () => dialogoEditar.close());
 
+// RF04 - Eliminar tareas
+async function eliminarTarea(id) {
+  const tarea = tareas.find((t) => t.id === id);
+  if (!tarea || !confirm(`¿Eliminar la tarea "${tarea.nombre}"?`)) return;
+  try {
+    await peticion(`${API}/${id}`, { method: "DELETE" });
+    mostrarMensaje("Tarea eliminada correctamente.");
+    await cargarTareas();
+  } catch (error) {
+    mostrarMensaje(error.message, true);
+  }
+}
+
 lista.addEventListener("click", (evento) => {
   const boton = evento.target.closest("button[data-accion]");
   if (!boton) return;
   const id = Number(boton.closest(".tarea").dataset.id);
   if (boton.dataset.accion === "editar") abrirEdicion(id);
+  if (boton.dataset.accion === "eliminar") eliminarTarea(id);
 });
 
 cargarTareas();
@@ -185,11 +200,25 @@ formEditar.addEventListener("submit", async (evento) => {
 
 document.getElementById("cancelar-edicion").addEventListener("click", () => dialogoEditar.close());
 
+// RF04 - Eliminar tareas
+async function eliminarTarea(id) {
+  const tarea = tareas.find((t) => t.id === id);
+  if (!tarea || !confirm(`¿Eliminar la tarea "${tarea.nombre}"?`)) return;
+  try {
+    await peticion(`${API}/${id}`, { method: "DELETE" });
+    mostrarMensaje("Tarea eliminada correctamente.");
+    await cargarTareas();
+  } catch (error) {
+    mostrarMensaje(error.message, true);
+  }
+}
+
 lista.addEventListener("click", (evento) => {
   const boton = evento.target.closest("button[data-accion]");
   if (!boton) return;
   const id = Number(boton.closest(".tarea").dataset.id);
   if (boton.dataset.accion === "editar") abrirEdicion(id);
+  if (boton.dataset.accion === "eliminar") eliminarTarea(id);
 });
 
 cargarTareas();

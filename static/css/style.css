@@ -92,6 +92,8 @@ input:focus, textarea:focus, select:focus { outline: 2px solid #9fc0ff; border-c
 .tarea-acciones { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
 .btn-secundario { background: #e8edf5; color: var(--texto); }
 .btn-secundario:hover { background: #d6deeb; }
+.btn-peligro { background: #fde8e8; color: var(--peligro); }
+.btn-peligro:hover { background: #f9d0d0; }
 .btn-guardar { background: var(--primario); color: #fff; }
 
 .dialogo {

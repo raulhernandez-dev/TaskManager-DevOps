@@ -136,6 +136,23 @@ def create_app(config=None):
         db.commit()
         return jsonify(obtener_tarea(tarea_id))
 
+    # RF05 - Cambiar estado
+    @app.patch("/api/tareas/<int:tarea_id>/estado")
+    def cambiar_estado(tarea_id):
+        if obtener_tarea(tarea_id) is None:
+            return jsonify({"error": "Tarea no encontrada."}), 404
+        datos = request.get_json(silent=True) or {}
+        estado = datos.get("estado")
+        if estado not in ESTADOS:
+            return jsonify({"error": f"Estado no valido. Use: {', '.join(ESTADOS)}."}), 400
+        db = get_db()
+        db.execute(
+            "UPDATE tareas SET estado = ?, actualizada_en = CURRENT_TIMESTAMP WHERE id = ?",
+            (estado, tarea_id),
+        )
+        db.commit()
+        return jsonify(obtener_tarea(tarea_id))
+
     # RF04 - Eliminar tareas
     @app.delete("/api/tareas/<int:tarea_id>")
     def eliminar_tarea(tarea_id):

@@ -118,6 +118,24 @@ def create_app(config=None):
         db.commit()
         return jsonify(obtener_tarea(cursor.lastrowid)), 201
 
+    # RF03 - Editar tareas
+    @app.put("/api/tareas/<int:tarea_id>")
+    def editar_tarea(tarea_id):
+        if obtener_tarea(tarea_id) is None:
+            return jsonify({"error": "Tarea no encontrada."}), 404
+        datos, error = validar_tarea(request.get_json(silent=True))
+        if error:
+            return jsonify({"error": error}), 400
+        db = get_db()
+        db.execute(
+            """UPDATE tareas
+               SET nombre = ?, descripcion = ?, actualizada_en = CURRENT_TIMESTAMP
+               WHERE id = ?""",
+            (datos["nombre"], datos["descripcion"], tarea_id),
+        )
+        db.commit()
+        return jsonify(obtener_tarea(tarea_id))
+
     return app
 
 

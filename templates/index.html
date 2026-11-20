@@ -45,6 +45,30 @@
     </section>
   </main>
 
+  <dialog id="dialogo-editar" class="dialogo">
+    <form id="form-editar" method="dialog" novalidate>
+      <h2>Editar tarea</h2>
+      <input type="hidden" name="id">
+      <label for="editar-nombre">Nombre de la tarea *</label>
+      <input type="text" id="editar-nombre" name="nombre" maxlength="120">
+
+      <label for="editar-descripcion">Descripción</label>
+      <textarea id="editar-descripcion" name="descripcion" rows="3" maxlength="500"></textarea>
+
+      <label for="editar-prioridad">Prioridad</label>
+      <select id="editar-prioridad" name="prioridad">
+        <option value="Alta">Alta</option>
+        <option value="Media">Media</option>
+        <option value="Baja">Baja</option>
+      </select>
+
+      <div class="dialogo-acciones">
+        <button type="button" class="btn btn-secundario" id="cancelar-edicion">Cancelar</button>
+        <button type="submit" class="btn btn-guardar">Guardar cambios</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="mensaje" class="mensaje" role="status" aria-live="polite"></div>
 
   <footer class="pie">TaskManager · Equipo DevOps · UTP</footer>

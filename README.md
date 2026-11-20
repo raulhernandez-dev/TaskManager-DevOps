@@ -3,6 +3,13 @@
 Sistema web para la gestión de tareas de la empresa **TechSolutions**, desarrollado aplicando las fases del ciclo de vida DevOps con GitHub (Projects, Issues, Actions y Releases).
 
 ![CI](https://github.com/raulhernandez-dev/TaskManager-DevOps/actions/workflows/ci.yml/badge.svg)
+![Despliegue](https://github.com/raulhernandez-dev/TaskManager-DevOps/actions/workflows/deploy.yml/badge.svg)
+
+| | |
+|---|---|
+| 🌐 Aplicación publicada | <https://taskmanager-devops-d46k.onrender.com> |
+| 📋 Tablero (GitHub Projects) | <https://github.com/users/raulhernandez-dev/projects/3> |
+| 🏷️ Versión estable | [v1.0.0](https://github.com/raulhernandez-dev/TaskManager-DevOps/releases/tag/v1.0.0) |
 
 ## Equipo
 
@@ -49,7 +56,7 @@ TaskManager-DevOps/
 └── .github/workflows/
     ├── ci.yml              # Integración continua
     ├── cd.yml              # Entrega continua (artefacto del release)
-    ├── deploy.yml          # Despliegue continuo a Render
+    ├── deploy.yml          # Pruebas + verificación del despliegue en Render
     └── monitor.yml         # Monitoreo programado
 ```
 

@@ -12,24 +12,36 @@ Se eligió **Render** porque es compatible con Python/Flask, se conecta directam
 | Comando de inicio | `gunicorn app:app` |
 | Variables de entorno | `PYTHON_VERSION=3.12.7`, `DATABASE_PATH=/tmp/taskmanager.db` |
 | Health check | `/health` |
+| Despliegue automático | `autoDeployTrigger: checksPass` (solo si GitHub Actions pasa) |
+| URL pública | <https://taskmanager-devops-d46k.onrender.com> |
 
 La configuración completa está en [`render.yaml`](../render.yaml) (Blueprint).
 
-## Pasos
+## Pasos realizados
 
-1. Crear una cuenta en <https://render.com> e iniciar sesión con GitHub.
-2. **New → Blueprint** y seleccionar el repositorio `TaskManager-DevOps` (Render lee `render.yaml`).
-3. Presionar **Apply / Deploy** y esperar a que termine.
-4. Copiar la URL pública (`https://taskmanager-devops-xxxx.onrender.com`).
-5. En Render → Settings → **Deploy Hook**, copiar la URL y guardarla en GitHub → Settings → Secrets and variables → Actions → **Secrets** como `RENDER_DEPLOY_HOOK`.
-6. En la misma pantalla, pestaña **Variables**, crear `APP_URL` con la URL pública (la usa el workflow de monitoreo).
+1. Iniciar sesión en <https://render.com> con la cuenta de GitHub.
+2. **New → Blueprint**, seleccionar el repositorio `TaskManager-DevOps` y nombrar el Blueprint `taskmanager-devops`.
+3. Render leyó `render.yaml` y creó el servicio web `taskmanager-devops`.
+4. **Deploy Blueprint**: la instalación y el arranque con gunicorn terminaron en ~30 s (19/11/2026, 21:12).
+5. Render asignó la URL pública <https://taskmanager-devops-d46k.onrender.com>.
+
+Registro del despliegue (logs de Render):
+
+```text
+==> Running 'gunicorn app:app'
+[INFO] Starting gunicorn 23.0.0
+[INFO] Listening at: http://0.0.0.0:10000
+INFO taskmanager: GET /health -> 200 (1.1 ms)
+==> Your service is live 🎉
+==> Available at your primary URL https://taskmanager-devops-d46k.onrender.com
+```
 
 ## Despliegue continuo
 
-El workflow [`deploy.yml`](../.github/workflows/deploy.yml) se ejecuta en cada push a `main`:
-
-1. Ejecuta todas las pruebas.
-2. Solo si pasan, llama al Deploy Hook de Render, que publica la nueva versión.
+1. Cada push a `main` ejecuta las pruebas en GitHub Actions (`ci.yml` y `deploy.yml`).
+2. Render está configurado con `autoDeployTrigger: checksPass`: **solo publica la nueva versión si todas las verificaciones de GitHub pasan**. Si una prueba falla, la versión anterior sigue en línea.
+3. `deploy.yml` verifica después que `/health` responda.
+4. Opcionalmente se puede usar un *Deploy Hook* de Render guardado como secreto `RENDER_DEPLOY_HOOK`.
 
 ## Consideraciones
 
@@ -38,11 +50,14 @@ El workflow [`deploy.yml`](../.github/workflows/deploy.yml) se ejecuta en cada p
 
 ## Verificación
 
+Verificación realizada el 19/11/2026 sobre la URL pública:
+
 | Verificación | Resultado |
 |---|---|
-| La URL es accesible | _pendiente de captura_ |
-| La página principal carga | _pendiente de captura_ |
-| Se pueden registrar tareas | _pendiente de captura_ |
-| Se pueden editar tareas | _pendiente de captura_ |
-| Se pueden eliminar tareas | _pendiente de captura_ |
-| Los estados se actualizan | _pendiente de captura_ |
+| La URL es accesible | ✅ `/health` → `{"estado":"ok","base_de_datos":"ok"}` |
+| La página principal carga | ✅ |
+| Se pueden registrar tareas | ✅ 3 tareas registradas con prioridad Alta, Media y Baja |
+| Validación de nombre vacío | ✅ "El nombre de la tarea es obligatorio." |
+| Se pueden editar tareas | ✅ nombre y prioridad actualizados (Baja → Alta) |
+| Se pueden eliminar tareas | ✅ el listado pasó de 3 a 2 tareas |
+| Los estados se actualizan | ✅ Pendiente → En proceso y Pendiente → Terminada |

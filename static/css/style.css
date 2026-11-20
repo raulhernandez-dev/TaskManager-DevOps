@@ -86,6 +86,18 @@ input:focus, textarea:focus, select:focus { outline: 2px solid #9fc0ff; border-c
   border-radius: 8px;
   padding: .9rem 1rem;
 }
+.prioridad-alta { border-left-color: var(--alta); }
+.prioridad-media { border-left-color: var(--media); }
+.prioridad-baja { border-left-color: var(--baja); }
+.tarea-cabecera { display: flex; justify-content: space-between; align-items: start; gap: .8rem; }
+.etiqueta { font-size: .75rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; white-space: nowrap; }
+.etiqueta-alta { background: #fde8e8; color: var(--alta); }
+.etiqueta-media { background: #fdf3e0; color: var(--media); }
+.etiqueta-baja { background: #e5f5ea; color: var(--baja); }
+
+.filtros { display: flex; gap: .6rem; margin-top: .9rem; flex-wrap: wrap; }
+.filtros select { width: auto; flex: 1; min-width: 160px; }
+
 .tarea h3 { margin: 0; font-size: 1.05rem; }
 .tarea p { margin: .35rem 0 .6rem; color: var(--texto-suave); white-space: pre-wrap; }
 

@@ -7,6 +7,8 @@ const lista = document.getElementById("lista-tareas");
 const sinTareas = document.getElementById("sin-tareas");
 const contador = document.getElementById("contador");
 const mensaje = document.getElementById("mensaje");
+const filtroEstado = document.getElementById("filtro-estado");
+const filtroPrioridad = document.getElementById("filtro-prioridad");
 const dialogoEditar = document.getElementById("dialogo-editar");
 const formEditar = document.getElementById("form-editar");
 
@@ -41,12 +43,14 @@ function escaparHTML(texto) {
 
 function crearElementoTarea(tarea) {
   const li = document.createElement("li");
-  li.className = `tarea estado-${tarea.estado.toLowerCase().replace(" ", "-")}`;
+  li.className = `tarea prioridad-${tarea.prioridad.toLowerCase()} estado-${tarea.estado.toLowerCase().replace(" ", "-")}`;
   li.dataset.id = tarea.id;
   li.innerHTML = `
-    <h3>${escaparHTML(tarea.nombre)}</h3>
+    <div class="tarea-cabecera">
+      <h3>${escaparHTML(tarea.nombre)}</h3>
+      <span class="etiqueta etiqueta-${tarea.prioridad.toLowerCase()}">${escaparHTML(tarea.prioridad)}</span>
+    </div>
     ${tarea.descripcion ? `<p>${escaparHTML(tarea.descripcion)}</p>` : ""}
-    <small>Prioridad: ${escaparHTML(tarea.prioridad)}</small>
     <div class="tarea-acciones">
       <select class="selector-estado" data-accion="estado" aria-label="Estado de la tarea">
         ${ESTADOS.map((e) => `<option value="${e}" ${e === tarea.estado ? "selected" : ""}>${e}</option>`).join("")}
@@ -59,11 +63,22 @@ function crearElementoTarea(tarea) {
 }
 
 function renderizar() {
+  const visibles = tareas.filter(
+    (t) =>
+      (!filtroEstado.value || t.estado === filtroEstado.value) &&
+      (!filtroPrioridad.value || t.prioridad === filtroPrioridad.value)
+  );
   lista.innerHTML = "";
-  tareas.forEach((t) => lista.appendChild(crearElementoTarea(t)));
-  sinTareas.classList.toggle("oculto", tareas.length > 0);
-  contador.textContent = `${tareas.length} ${tareas.length === 1 ? "tarea" : "tareas"}`;
+  visibles.forEach((t) => lista.appendChild(crearElementoTarea(t)));
+  sinTareas.textContent = tareas.length
+    ? "No hay tareas que coincidan con los filtros."
+    : "Todavía no hay tareas registradas.";
+  sinTareas.classList.toggle("oculto", visibles.length > 0);
+  contador.textContent = `${visibles.length} de ${tareas.length} ${tareas.length === 1 ? "tarea" : "tareas"}`;
 }
+
+filtroEstado.addEventListener("change", renderizar);
+filtroPrioridad.addEventListener("change", renderizar);
 
 // RF02 - Consultar tareas
 async function cargarTareas() {

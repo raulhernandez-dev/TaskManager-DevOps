@@ -40,6 +40,20 @@
         <h2 id="titulo-lista">Tareas registradas</h2>
         <span id="contador" class="contador">0 tareas</span>
       </div>
+      <div class="filtros">
+        <select id="filtro-estado" aria-label="Filtrar por estado">
+          <option value="">Todos los estados</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="En proceso">En proceso</option>
+          <option value="Terminada">Terminada</option>
+        </select>
+        <select id="filtro-prioridad" aria-label="Filtrar por prioridad">
+          <option value="">Todas las prioridades</option>
+          <option value="Alta">Alta</option>
+          <option value="Media">Media</option>
+          <option value="Baja">Baja</option>
+        </select>
+      </div>
       <ul id="lista-tareas" class="lista"></ul>
       <p id="sin-tareas" class="vacio">Todavía no hay tareas registradas.</p>
     </section>

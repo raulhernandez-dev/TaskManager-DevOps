@@ -68,6 +68,8 @@ def validar_tarea(datos):
 
     descripcion = str(datos.get("descripcion") or "").strip()
     prioridad = datos.get("prioridad") or "Media"
+    if prioridad not in PRIORIDADES:
+        return None, f"Prioridad no valida. Use: {', '.join(PRIORIDADES)}."
 
     return {"nombre": nombre, "descripcion": descripcion, "prioridad": prioridad}, None
 
@@ -94,7 +96,11 @@ def create_app(config=None):
     # RF02 - Consultar tareas
     @app.get("/api/tareas")
     def listar_tareas():
-        filas = get_db().execute("SELECT * FROM tareas ORDER BY id DESC").fetchall()
+        filas = get_db().execute(
+            """SELECT * FROM tareas
+               ORDER BY CASE prioridad WHEN 'Alta' THEN 0 WHEN 'Media' THEN 1 ELSE 2 END,
+                        id DESC"""
+        ).fetchall()
         return jsonify([fila_a_dict(f) for f in filas])
 
     @app.get("/api/tareas/<int:tarea_id>")

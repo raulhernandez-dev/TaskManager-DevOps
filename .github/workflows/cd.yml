@@ -1,0 +1,43 @@
+name: Entrega Continua
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  entrega:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verificar pruebas antes de entregar
+        run: |
+          pip install -r requirements.txt
+          pytest -q
+
+      - name: Preparar artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: TaskManager-${{ github.event.release.tag_name }}
+          path: |
+            app.py
+            requirements.txt
+            render.yaml
+            templates/
+            static/
+
+      - name: Adjuntar paquete al Release
+        run: |
+          zip -r TaskManager-${{ github.event.release.tag_name }}.zip app.py requirements.txt render.yaml templates static
+          gh release upload ${{ github.event.release.tag_name }} TaskManager-${{ github.event.release.tag_name }}.zip --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

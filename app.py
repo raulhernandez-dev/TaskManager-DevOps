@@ -2,7 +2,7 @@
 import os
 import sqlite3
 
-from flask import Flask, g, render_template
+from flask import Flask, g, jsonify, render_template, request
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -46,6 +46,32 @@ def init_db(app):
         db.commit()
 
 
+def fila_a_dict(fila):
+    return {clave: fila[clave] for clave in fila.keys()}
+
+
+def obtener_tarea(tarea_id):
+    fila = get_db().execute("SELECT * FROM tareas WHERE id = ?", (tarea_id,)).fetchone()
+    return fila_a_dict(fila) if fila else None
+
+
+def validar_tarea(datos):
+    """Valida los datos de una tarea. Devuelve (datos_limpios, error)."""
+    if not isinstance(datos, dict):
+        return None, "El cuerpo de la peticion debe ser JSON."
+
+    nombre = str(datos.get("nombre") or "").strip()
+    if not nombre:
+        return None, "El nombre de la tarea es obligatorio."
+    if len(nombre) > 120:
+        return None, "El nombre no puede superar 120 caracteres."
+
+    descripcion = str(datos.get("descripcion") or "").strip()
+    prioridad = datos.get("prioridad") or "Media"
+
+    return {"nombre": nombre, "descripcion": descripcion, "prioridad": prioridad}, None
+
+
 def create_app(config=None):
     app = Flask(__name__)
     app.config["DATABASE"] = os.environ.get(
@@ -64,6 +90,33 @@ def create_app(config=None):
     @app.route("/")
     def index():
         return render_template("index.html")
+
+    # RF02 - Consultar tareas
+    @app.get("/api/tareas")
+    def listar_tareas():
+        filas = get_db().execute("SELECT * FROM tareas ORDER BY id DESC").fetchall()
+        return jsonify([fila_a_dict(f) for f in filas])
+
+    @app.get("/api/tareas/<int:tarea_id>")
+    def ver_tarea(tarea_id):
+        tarea = obtener_tarea(tarea_id)
+        if tarea is None:
+            return jsonify({"error": "Tarea no encontrada."}), 404
+        return jsonify(tarea)
+
+    # RF01 - Registrar tareas
+    @app.post("/api/tareas")
+    def crear_tarea():
+        datos, error = validar_tarea(request.get_json(silent=True))
+        if error:
+            return jsonify({"error": error}), 400
+        db = get_db()
+        cursor = db.execute(
+            "INSERT INTO tareas (nombre, descripcion, prioridad) VALUES (?, ?, ?)",
+            (datos["nombre"], datos["descripcion"], datos["prioridad"]),
+        )
+        db.commit()
+        return jsonify(obtener_tarea(cursor.lastrowid)), 201
 
     return app
 

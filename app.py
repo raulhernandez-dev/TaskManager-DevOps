@@ -135,9 +135,10 @@ def create_app(config=None):
         db = get_db()
         db.execute(
             """UPDATE tareas
-               SET nombre = ?, descripcion = ?, actualizada_en = CURRENT_TIMESTAMP
+               SET nombre = ?, descripcion = ?, prioridad = ?,
+                   actualizada_en = CURRENT_TIMESTAMP
                WHERE id = ?""",
-            (datos["nombre"], datos["descripcion"], tarea_id),
+            (datos["nombre"], datos["descripcion"], datos["prioridad"], tarea_id),
         )
         db.commit()
         return jsonify(obtener_tarea(tarea_id))

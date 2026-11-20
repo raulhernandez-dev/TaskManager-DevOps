@@ -11,13 +11,14 @@ permissions:
 jobs:
   verificar:
     runs-on: ubuntu-latest
-    if: ${{ vars.APP_URL != '' }}
+    env:
+      APP_URL: ${{ vars.APP_URL || 'https://taskmanager-devops-d46k.onrender.com' }}
     steps:
       - name: Verificar disponibilidad y tiempo de respuesta
         id: health
         run: |
           set +e
-          resultado=$(curl -s -o respuesta.json -w "%{http_code} %{time_total}" --max-time 90 "${{ vars.APP_URL }}/health")
+          resultado=$(curl -s -o respuesta.json -w "%{http_code} %{time_total}" --max-time 90 "$APP_URL/health")
           codigo=$(echo $resultado | cut -d' ' -f1)
           tiempo=$(echo $resultado | cut -d' ' -f2)
           echo "codigo=$codigo" >> $GITHUB_OUTPUT
@@ -25,7 +26,7 @@ jobs:
           echo "### Monitoreo de TaskManager" >> $GITHUB_STEP_SUMMARY
           echo "| URL | Código HTTP | Tiempo (s) |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| ${{ vars.APP_URL }} | $codigo | $tiempo |" >> $GITHUB_STEP_SUMMARY
+          echo "| $APP_URL | $codigo | $tiempo |" >> $GITHUB_STEP_SUMMARY
           cat respuesta.json || true
           [ "$codigo" = "200" ]
 
@@ -37,7 +38,7 @@ jobs:
             --label "incidencia" \
             --body "Detectado por el workflow de monitoreo.
           - Fecha de detección: $(date -u)
-          - URL: ${{ vars.APP_URL }}/health
+          - URL: $APP_URL/health
           - Código HTTP: ${{ steps.health.outputs.codigo }}
           - Tiempo de respuesta: ${{ steps.health.outputs.tiempo }} s
           - Ejecución: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

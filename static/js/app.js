@@ -6,6 +6,8 @@ const lista = document.getElementById("lista-tareas");
 const sinTareas = document.getElementById("sin-tareas");
 const contador = document.getElementById("contador");
 const mensaje = document.getElementById("mensaje");
+const dialogoEditar = document.getElementById("dialogo-editar");
+const formEditar = document.getElementById("form-editar");
 
 let tareas = [];
 let temporizadorMensaje;
@@ -44,6 +46,9 @@ function crearElementoTarea(tarea) {
     <h3>${escaparHTML(tarea.nombre)}</h3>
     ${tarea.descripcion ? `<p>${escaparHTML(tarea.descripcion)}</p>` : ""}
     <small>Prioridad: ${escaparHTML(tarea.prioridad)} · Estado: ${escaparHTML(tarea.estado)}</small>
+    <div class="tarea-acciones">
+      <button type="button" class="btn btn-secundario" data-accion="editar">Editar</button>
+    </div>
   `;
   return li;
 }
@@ -89,10 +94,102 @@ formTarea.addEventListener("submit", async (evento) => {
     });
     formTarea.reset();
     mostrarMensaje("Tarea registrada correctamente.");
+    await // RF03 - Editar tareas
+function abrirEdicion(id) {
+  const tarea = tareas.find((t) => t.id === id);
+  if (!tarea) return;
+  formEditar.id.value = tarea.id;
+  formEditar.nombre.value = tarea.nombre;
+  formEditar.descripcion.value = tarea.descripcion;
+  formEditar.prioridad.value = tarea.prioridad;
+  formEditar.nombre.classList.remove("invalido");
+  dialogoEditar.showModal();
+}
+
+formEditar.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const nombre = formEditar.nombre.value.trim();
+  formEditar.nombre.classList.toggle("invalido", !nombre);
+  if (!nombre) {
+    mostrarMensaje("El nombre de la tarea es obligatorio.", true);
+    return;
+  }
+  try {
+    await peticion(`${API}/${formEditar.id.value}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        nombre,
+        descripcion: formEditar.descripcion.value,
+        prioridad: formEditar.prioridad.value,
+      }),
+    });
+    dialogoEditar.close();
+    mostrarMensaje("Tarea actualizada correctamente.");
     await cargarTareas();
   } catch (error) {
     mostrarMensaje(error.message, true);
   }
+});
+
+document.getElementById("cancelar-edicion").addEventListener("click", () => dialogoEditar.close());
+
+lista.addEventListener("click", (evento) => {
+  const boton = evento.target.closest("button[data-accion]");
+  if (!boton) return;
+  const id = Number(boton.closest(".tarea").dataset.id);
+  if (boton.dataset.accion === "editar") abrirEdicion(id);
+});
+
+cargarTareas();
+  } catch (error) {
+    mostrarMensaje(error.message, true);
+  }
+});
+
+// RF03 - Editar tareas
+function abrirEdicion(id) {
+  const tarea = tareas.find((t) => t.id === id);
+  if (!tarea) return;
+  formEditar.id.value = tarea.id;
+  formEditar.nombre.value = tarea.nombre;
+  formEditar.descripcion.value = tarea.descripcion;
+  formEditar.prioridad.value = tarea.prioridad;
+  formEditar.nombre.classList.remove("invalido");
+  dialogoEditar.showModal();
+}
+
+formEditar.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const nombre = formEditar.nombre.value.trim();
+  formEditar.nombre.classList.toggle("invalido", !nombre);
+  if (!nombre) {
+    mostrarMensaje("El nombre de la tarea es obligatorio.", true);
+    return;
+  }
+  try {
+    await peticion(`${API}/${formEditar.id.value}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        nombre,
+        descripcion: formEditar.descripcion.value,
+        prioridad: formEditar.prioridad.value,
+      }),
+    });
+    dialogoEditar.close();
+    mostrarMensaje("Tarea actualizada correctamente.");
+    await cargarTareas();
+  } catch (error) {
+    mostrarMensaje(error.message, true);
+  }
+});
+
+document.getElementById("cancelar-edicion").addEventListener("click", () => dialogoEditar.close());
+
+lista.addEventListener("click", (evento) => {
+  const boton = evento.target.closest("button[data-accion]");
+  if (!boton) return;
+  const id = Number(boton.closest(".tarea").dataset.id);
+  if (boton.dataset.accion === "editar") abrirEdicion(id);
 });
 
 cargarTareas();

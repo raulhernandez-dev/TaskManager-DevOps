@@ -89,6 +89,22 @@ input:focus, textarea:focus, select:focus { outline: 2px solid #9fc0ff; border-c
 .tarea h3 { margin: 0; font-size: 1.05rem; }
 .tarea p { margin: .35rem 0 .6rem; color: var(--texto-suave); white-space: pre-wrap; }
 
+.tarea-acciones { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
+.btn-secundario { background: #e8edf5; color: var(--texto); }
+.btn-secundario:hover { background: #d6deeb; }
+.btn-guardar { background: var(--primario); color: #fff; }
+
+.dialogo {
+  border: none;
+  border-radius: var(--radio);
+  padding: 1.4rem;
+  width: min(460px, 92vw);
+  box-shadow: 0 12px 40px rgba(0,0,0,.25);
+}
+.dialogo::backdrop { background: rgba(15, 23, 42, .45); }
+.dialogo h2 { margin: 0 0 .5rem; font-size: 1.2rem; }
+.dialogo-acciones { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.2rem; }
+
 .vacio { color: var(--texto-suave); text-align: center; padding: 2rem 0; }
 .oculto { display: none !important; }
 

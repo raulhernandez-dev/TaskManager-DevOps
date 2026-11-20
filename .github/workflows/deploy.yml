@@ -20,13 +20,18 @@ jobs:
     needs: pruebas
     runs-on: ubuntu-latest
     steps:
-      - name: Disparar despliegue en Render
+      - name: Disparar despliegue en Render (opcional con Deploy Hook)
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
           if [ -z "$RENDER_DEPLOY_HOOK" ]; then
-            echo "::warning::Falta el secreto RENDER_DEPLOY_HOOK; no se dispara el despliegue."
+            echo "Render despliega automaticamente cuando estas pruebas pasan (autoDeployTrigger: checksPass)."
             exit 0
           fi
           curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
           echo "Despliegue solicitado a Render."
+
+      - name: Verificar disponibilidad de la aplicacion publicada
+        run: |
+          sleep 120
+          curl -fsS --retry 5 --retry-delay 20 --max-time 90 https://taskmanager-devops-d46k.onrender.com/health

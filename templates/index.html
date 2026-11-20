@@ -3,12 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaskManager</title>
+  <title>TaskManager | TechSolutions</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <h1>TaskManager</h1>
-  <p>Sistema web para la gestión de tareas.</p>
+  <header class="encabezado">
+    <div class="contenedor">
+      <h1>Task<span>Manager</span></h1>
+      <p>Gestión de tareas de TechSolutions</p>
+    </div>
+  </header>
+
+  <main class="contenedor principal">
+    <section class="panel" aria-labelledby="titulo-nueva">
+      <h2 id="titulo-nueva">Nueva tarea</h2>
+      <form id="form-tarea" novalidate>
+        <label for="nombre">Nombre de la tarea *</label>
+        <input type="text" id="nombre" name="nombre" maxlength="120" placeholder="Ej. Elaborar documentación">
+
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" name="descripcion" rows="3" maxlength="500" placeholder="Detalles de la actividad"></textarea>
+
+        <label for="prioridad">Prioridad</label>
+        <select id="prioridad" name="prioridad">
+          <option value="Alta">Alta</option>
+          <option value="Media" selected>Media</option>
+          <option value="Baja">Baja</option>
+        </select>
+
+        <button type="submit" class="btn btn-primario">Guardar tarea</button>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="titulo-lista">
+      <div class="panel-cabecera">
+        <h2 id="titulo-lista">Tareas registradas</h2>
+        <span id="contador" class="contador">0 tareas</span>
+      </div>
+      <ul id="lista-tareas" class="lista"></ul>
+      <p id="sin-tareas" class="vacio">Todavía no hay tareas registradas.</p>
+    </section>
+  </main>
+
+  <div id="mensaje" class="mensaje" role="status" aria-live="polite"></div>
+
+  <footer class="pie">TaskManager · Equipo DevOps · UTP</footer>
+
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

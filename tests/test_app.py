@@ -126,3 +126,14 @@ def test_seleccionar_prioridad(client):
 def test_prioridad_invalida(client):
     respuesta = crear(client, prioridad="Urgente")
     assert respuesta.status_code == 400
+
+
+# Monitoreo
+def test_health(client):
+    crear(client)
+    respuesta = client.get("/health")
+    assert respuesta.status_code == 200
+    datos = respuesta.get_json()
+    assert datos["estado"] == "ok"
+    assert datos["tareas"] == 1
+    assert "X-Response-Time" in respuesta.headers

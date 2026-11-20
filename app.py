@@ -1,8 +1,17 @@
 """TaskManager - Sistema web para la gestion de tareas de TechSolutions."""
+import logging
 import os
 import sqlite3
+import time
 
 from flask import Flask, g, jsonify, render_template, request
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+)
+logger = logging.getLogger("taskmanager")
+VERSION = "1.0.0"
+INICIO = time.time()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -88,6 +97,44 @@ def create_app(config=None):
 
     app.teardown_appcontext(close_db)
     init_db(app)
+
+    # Monitoreo: tiempo de respuesta y registro de cada peticion
+    @app.before_request
+    def iniciar_cronometro():
+        g.inicio = time.perf_counter()
+
+    @app.after_request
+    def registrar_peticion(respuesta):
+        if "inicio" in g:
+            duracion_ms = (time.perf_counter() - g.inicio) * 1000
+            respuesta.headers["X-Response-Time"] = f"{duracion_ms:.1f}ms"
+            if not request.path.startswith("/static"):
+                logger.info(
+                    "%s %s -> %s (%.1f ms)",
+                    request.method, request.path, respuesta.status_code, duracion_ms,
+                )
+        return respuesta
+
+    @app.errorhandler(500)
+    def error_interno(error):
+        logger.exception("Error interno: %s", error)
+        return jsonify({"error": "Error interno del servidor."}), 500
+
+    @app.get("/health")
+    def health():
+        """Endpoint de monitoreo: disponibilidad de la app y de la base de datos."""
+        try:
+            total = get_db().execute("SELECT COUNT(*) FROM tareas").fetchone()[0]
+            return jsonify({
+                "estado": "ok",
+                "base_de_datos": "ok",
+                "tareas": total,
+                "version": VERSION,
+                "activo_desde_segundos": int(time.time() - INICIO),
+            })
+        except sqlite3.Error as error:
+            logger.error("Fallo en la base de datos: %s", error)
+            return jsonify({"estado": "error", "base_de_datos": str(error)}), 503
 
     @app.route("/")
     def index():
